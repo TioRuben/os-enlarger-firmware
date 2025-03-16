@@ -1,0 +1,16 @@
+{
+    "C_Cpp.intelliSenseEngine": "default",
+    "idf.espIdfPathWin": "d:\\Ruben\\esp-idf\\v5.4\\esp-idf",
+    "idf.pythonInstallPath": "C:\\Users\\tioru\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.openOcdConfigs": [
+        "board/esp32h2-ftdi.cfg"
+    ],
+    "idf.portWin": "COM3",
+    "idf.toolsPathWin": "C:\\\\Users\\\\tioru\\\\.espressif",
+    "idf.customExtraVars": {
+        "OPENOCD_SCRIPTS": "C:\\Users\\tioru\\.espressif\\tools\\openocd-esp32\\v0.11.0-esp32-20221026/openocd-esp32/share/openocd/scripts",
+        "IDF_CCACHE_ENABLE": "1",
+        "ESP_ROM_ELF_DIR": "C:\\Users\\tioru\\.espressif\\tools\\esp-rom-elfs\\20220823/",
+        "IDF_TARGET": "esp32h2"
+    }
+}
