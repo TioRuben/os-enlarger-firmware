@@ -456,47 +456,39 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
         ESP_LOGI(OS_ENLARGER_TAG, "ESP_GATTS_READ_EVT");
         break;
     case ESP_GATTS_WRITE_EVT:
-        if (param->write.is_prep)
+        ESP_LOGI(OS_ENLARGER_TAG, "GATT_WRITE_EVT, handle = %d, value len = %d",
+                 param->write.handle, param->write.len);
+        ESP_LOG_BUFFER_HEX(OS_ENLARGER_TAG, param->write.value, param->write.len);
+        if (rgbw_light_handle_table[IDX_CHAR_VAL] == param->write.handle)
         {
-            ESP_LOGI(OS_ENLARGER_TAG, "GATT_WRITE_EVT, handle = %d, value len = %d",
-                     param->write.handle, param->write.len);
-            ESP_LOG_BUFFER_HEX(OS_ENLARGER_TAG, param->write.value, param->write.len);
-            if (rgbw_light_handle_table[IDX_CHAR_VAL] == param->write.handle)
+            if (param->write.len != 4)
             {
-                if (param->write.len != 4)
+                ESP_LOGE(OS_ENLARGER_TAG, "Expected 4 bytes for RGBW value");
+                if (param->write.need_rsp)
                 {
-                    ESP_LOGE(OS_ENLARGER_TAG, "Expected 4 bytes for RGBW value");
-                    if (param->write.need_rsp)
-                    {
-                        esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                                    param->write.trans_id, ESP_GATT_INVALID_ATTR_LEN, NULL);
-                    }
-                    break;
+                    esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+                                                param->write.trans_id, ESP_GATT_INVALID_ATTR_LEN, NULL);
                 }
-                // Update the attribute value with the new 4-byte RGBW data
-                esp_err_t set_attr_ret = esp_ble_gatts_set_attr_value(rgbw_light_handle_table[IDX_CHAR_VAL],
-                                                                      4, param->write.value);
-                if (set_attr_ret != ESP_OK)
-                {
-                    ESP_LOGE(OS_ENLARGER_TAG, "Failed to update RGBW value");
-                }
-                else
-                {
-                    ESP_LOGI(OS_ENLARGER_TAG, "RGBW value updated");
-                    // Update LEDC outputs with new RGBW values
-                    update_leds(param->write.value);
-                }
+                break;
             }
-            if (param->write.need_rsp)
+            // Update the attribute value with the new 4-byte RGBW data
+            esp_err_t set_attr_ret = esp_ble_gatts_set_attr_value(rgbw_light_handle_table[IDX_CHAR_VAL],
+                                                                  4, param->write.value);
+            if (set_attr_ret != ESP_OK)
             {
-                esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                            param->write.trans_id, ESP_GATT_OK, NULL);
+                ESP_LOGE(OS_ENLARGER_TAG, "Failed to update RGBW value");
+            }
+            else
+            {
+                ESP_LOGI(OS_ENLARGER_TAG, "RGBW value updated");
+                // Update LEDC outputs with new RGBW values
+                update_leds(param->write.value);
             }
         }
-        else
+        if (param->write.need_rsp)
         {
-            /* handle prepare write */
-            example_prepare_write_event_env(gatts_if, &prepare_write_env, param);
+            esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+                                        param->write.trans_id, ESP_GATT_OK, NULL);
         }
         break;
     case ESP_GATTS_EXEC_WRITE_EVT:
